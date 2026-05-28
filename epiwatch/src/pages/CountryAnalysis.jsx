@@ -440,67 +440,163 @@ export default function CountryAnalysis() {
             </div>
 
             {/* 2. COUNTRY SEARCH + SELECTOR */}
-            <div className="w-full max-w-[280px]" ref={dropdownRef}>
-              <div className="relative">
+<div className="w-full max-w-[320px]" ref={dropdownRef}>
+  <div className="relative">
 
-                {/* Single input row */}
-                <div className="flex items-center bg-white dark:bg-[#0f172a] border border-slate-300 dark:border-slate-600/50 rounded-[10px] overflow-visible">
-                  <input
-                    type="text"
-                    placeholder="Search country..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 bg-transparent text-slate-900 dark:text-white px-[14px] py-[10px] outline-none text-sm"
-                  />
-                  <button
-                    type="button"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      setIsOpen((prev) => !prev);
-                    }}
-                    className="px-3 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-                  >
-                    <ChevronDown
-                      className={`w-5 h-5 transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
-                    />
-                  </button>
-                </div>
+    {/* Search input — always visible, opens dropdown on focus/type */}
+    <div className={`flex items-center bg-white dark:bg-[#0f172a] border rounded-[10px] overflow-visible transition-colors ${
+      isOpen
+        ? 'border-blue-400 dark:border-blue-500 shadow-[0_0_0_3px_rgba(59,130,246,0.15)]'
+        : 'border-slate-300 dark:border-slate-600/50'
+    }`}>
+      {/* Search icon */}
+      <svg
+        className="w-4 h-4 ml-3 text-slate-400 dark:text-slate-500 shrink-0"
+        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+      </svg>
 
-                {/* Dropdown list — only visible when chevron clicked */}
-                {isOpen && (
-                  <div className="absolute top-[calc(100%+6px)] left-0 right-0 z-50 bg-white dark:bg-[#0f172a] border border-slate-300 dark:border-slate-600/50 rounded-[10px] overflow-hidden shadow-lg max-h-[220px] overflow-y-auto">
-                    {filteredCountries.length > 0 ? (
-                      filteredCountries.map(([key, data]) => (
-                        <div
-                          key={key}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            setSelectedCountry(key);
-                            setSearchTerm('');
-                            setIsOpen(false);
-                          }}
-                          className={clsx(
-                            "px-[14px] py-[10px] cursor-pointer text-sm font-medium text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between transition-colors",
-                            selectedCountry === key && "bg-slate-100 dark:bg-slate-800"
-                          )}
-                        >
-                          <span>{data.name}</span>
-                          {selectedCountry === key && (
-                            <svg className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          )}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="px-[14px] py-[10px] text-sm text-slate-400 dark:text-slate-500">
-                        No countries found
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+      <input
+        type="text"
+        placeholder={`Search countries...`}
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setIsOpen(true);
+        }}
+        onFocus={() => setIsOpen(true)}
+        className="flex-1 bg-transparent text-slate-900 dark:text-white px-2.5 py-[10px] outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+      />
+
+      {/* Clear button — shown when there's a search term */}
+      {searchTerm && (
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setSearchTerm('');
+          }}
+          className="px-2 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
+      {/* Chevron toggle */}
+      <button
+        type="button"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          setIsOpen((prev) => !prev);
+        }}
+        className="px-3 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors border-l border-slate-200 dark:border-slate-700"
+      >
+        <ChevronDown
+          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+        />
+      </button>
+    </div>
+
+    {/* Selected country pill — shown below input when dropdown is closed */}
+    {!isOpen && (
+      <div className="mt-2 flex items-center gap-2 px-1">
+        <span
+          className="w-2 h-2 rounded-full shrink-0"
+          style={{ backgroundColor: COUNTRY_STATIC[selectedCountry]?.color || '#94a3b8' }}
+        />
+        <span className="text-[13px] font-medium text-slate-700 dark:text-slate-300">
+          {COUNTRY_STATIC[selectedCountry]?.name}
+        </span>
+        <span className="text-[11px] text-slate-400 dark:text-slate-500 ml-auto">
+          R₀ {COUNTRY_STATIC[selectedCountry]?.r0}
+        </span>
+      </div>
+    )}
+
+    {/* Dropdown list */}
+    {isOpen && (
+      <div className="absolute top-[calc(100%+6px)] left-0 right-0 z-50 bg-white dark:bg-[#0f172a] border border-slate-300 dark:border-slate-600/50 rounded-[10px] overflow-hidden shadow-xl max-h-[240px] overflow-y-auto">
+
+        {/* Result count header */}
+        <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+            {filteredCountries.length} {filteredCountries.length === 1 ? 'country' : 'countries'}
+            {searchTerm && ` for "${searchTerm}"`}
+          </span>
+          {searchTerm && (
+            <button
+              onMouseDown={(e) => { e.preventDefault(); setSearchTerm(''); }}
+              className="text-[11px] text-blue-500 hover:text-blue-600 font-medium"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {filteredCountries.length > 0 ? (
+          filteredCountries.map(([key, data]) => (
+            <div
+              key={key}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setSelectedCountry(key);
+                setSearchTerm('');
+                setIsOpen(false);
+              }}
+              className={clsx(
+                "px-3 py-2.5 cursor-pointer text-sm font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors",
+                selectedCountry === key && "bg-blue-50 dark:bg-blue-900/20"
+              )}
+            >
+              {/* Risk color dot */}
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ backgroundColor: data.color }}
+              />
+
+              <span className="flex-1">{data.name}</span>
+
+              {/* Meta: vacc + R0 */}
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-2 shrink-0">
+                <span>💉 {data.vacc}</span>
+                <span className={data.r0 > 1 ? 'text-red-400' : 'text-emerald-400'}>
+                  R₀ {data.r0}
+                </span>
+              </span>
+
+              {selectedCountry === key && (
+                <svg className="w-3.5 h-3.5 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
             </div>
+          ))
+        ) : (
+          /* Empty state */
+          <div className="px-4 py-8 flex flex-col items-center gap-2 text-center">
+            <svg className="w-8 h-8 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400 m-0">
+              No countries match <span className="text-slate-700 dark:text-slate-200">"{searchTerm}"</span>
+            </p>
+            <button
+              onMouseDown={(e) => { e.preventDefault(); setSearchTerm(''); }}
+              className="text-[12px] text-blue-500 hover:text-blue-600 font-medium mt-1"
+            >
+              Clear search
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+</div>
 
             {/* 3. DYNAMIC STAT CARDS */}
             <AnimatePresence mode="wait">
